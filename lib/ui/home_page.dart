@@ -84,7 +84,9 @@ class _HomePageState extends State<Homepage>{
           ),
         ),
         onDateChange: (date){
-          _selectedDate=date;
+          setState(() {
+            _selectedDate=date;
+          });
         },
       ),
     );
@@ -145,21 +147,100 @@ class _HomePageState extends State<Homepage>{
           return ListView.builder(
             itemCount: _taskController.taskList.length,
               itemBuilder:(_,index){
-                  return  AnimationConfiguration.staggeredList(position: index,
-                      child: SlideAnimation(
-                        child: FadeInAnimation(
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: (){
-                                  _showBottomSheet(context,_taskController.taskList[index]);
-                                },
-                                child: TaskTile(_taskController.taskList[index]),
-                              )
-                            ],
-                          ),
+              Task task=_taskController.taskList[index];
+              if(task.repeat=='Daily'){
+                if(task.isCompleted==0){
+                  DateTime date=DateFormat.jm().parse(task.startTime.toString());
+                  var myTime=DateFormat("HH:mm").format(date);//like 11.46
+                  notifyHelper.scheduledNotification(
+                      int.parse(myTime.toString().split(":")[0]),
+                      int.parse(myTime.toString().split(":")[1]),
+                      task
+                  );
+                }
+                return  AnimationConfiguration.staggeredList(position: index,
+                    child: SlideAnimation(
+                      child: FadeInAnimation(
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: (){
+                                _showBottomSheet(context,task);
+                              },
+                              child: TaskTile(task),
+                            )
+                          ],
                         ),
-                      ));
+                      ),
+                    ));
+              }
+              // if(task.repeat=='Monthly'){
+              //   print(task.date.toString());
+              //   print(DateFormat.d().format(_selectedDate));
+              //   if(task.date.toString().split("/")[0]==DateFormat.d().format(_selectedDate)){
+              //     return  AnimationConfiguration.staggeredList(position: index,
+              //         child: SlideAnimation(
+              //           child: FadeInAnimation(
+              //             child: Row(
+              //               children: [
+              //                 GestureDetector(
+              //                   onTap: (){
+              //                     _showBottomSheet(context,task);
+              //                   },
+              //                   child: TaskTile(task),
+              //                 )
+              //               ],
+              //             ),
+              //           ),
+              //         ));
+              //   }
+              // }
+              if(task.date==DateFormat.yMd().format(_selectedDate)){
+                DateTime date=DateFormat.jm().parse(task.startTime.toString());
+                var myTime=DateFormat("HH:mm").format(date);
+                if(task.isCompleted==0) {
+                  notifyHelper.scheduledNotification(
+                      int.parse(myTime.toString().split(":")[0]),
+                      int.parse(myTime.toString().split(":")[1]),
+                      task
+                  );
+                }
+                return  AnimationConfiguration.staggeredList(position: index,
+                    child: SlideAnimation(
+                      child: FadeInAnimation(
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: (){
+                                _showBottomSheet(context,task);
+                              },
+                              child: TaskTile(task),
+                            )
+                          ],
+                        ),
+                      ),
+                    ));
+              }
+              // if(DateFormat.EEEE().format(task.date as DateTime)==DateFormat.EEEE().format(_selectedDate)){
+              //   return  AnimationConfiguration.staggeredList(position: index,
+              //       child: SlideAnimation(
+              //         child: FadeInAnimation(
+              //           child: Row(
+              //             children: [
+              //               GestureDetector(
+              //                 onTap: (){
+              //                   _showBottomSheet(context,task);
+              //                 },
+              //                 child: TaskTile(task),
+              //               )
+              //             ],
+              //           ),
+              //         ),
+              //       ));
+              // }
+              else{
+                return Container();
+              }
               });
         }),
     );
